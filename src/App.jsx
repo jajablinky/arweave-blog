@@ -9,25 +9,23 @@ function App() {
   const [pageNumber, setPageNumber] = useState(1);
 
   // Grab transactionID from aarweave Original-Content-Digest OR we can go by contributor using their eth address
-  const FetchTransactionId = () => {};
+  const { data, isLoading, error } = FetchTransactionId();
   // Using that transactionID you're able to pull that post's content from graphQL endpoint
-  const { blogs, setBlogs } = useFetchBlogs();
+  // const { blogs, setBlogs } = useFetchBlogs();
 
   // Infinite loading everytime you press the button it loads 3 more blogs
-  const handleLoadMore = (query, pageNumber) => {
-    set;
-  };
+  const handleLoadMore = (query, pageNumber) => {};
 
   return (
     <div className="App">
-      {blogs.map((blog) => {
+      {/* {blogs.map((blog) => {
         return (
           <>
             <h1 key={blog.title}>{blog.title}</h1>
             <p key={blog.content}>{blog.content}</p>
           </>
         );
-      })}
+      })} */}
       <button onClick={handleLoadMore}>Load More</button>
     </div>
   );
