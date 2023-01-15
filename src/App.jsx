@@ -1,32 +1,61 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import useFetchBlogs from "./hooks/useFetchBlogs";
 import FetchTransactionId from "./hooks/FetchTransactionId";
+import Arweave from "arweave";
+
+const arweave = Arweave.init({});
 
 function App() {
-  // handle state of query, and pageNumber for graphQL request
-  const [query, setQuery] = useState("");
-  const [pageNumber, setPageNumber] = useState(1);
-
-  // Grab transactionID from aarweave Original-Content-Digest OR we can go by contributor using their eth address
+  // Grab transactionID for three blog posts using contributor eth address
   const { data, isLoading, error } = FetchTransactionId();
-  // Using that transactionID you're able to pull that post's content from graphQL endpoint
-  // const { blogs, setBlogs } = useFetchBlogs();
+
+  // State management
+  const [blogs, setBlogs] = useState([]);
+
+  // Using those three transactionID from data in useFetchBlogs for fetching blog posts content and title
+  useEffect(() => {
+    if (!isLoading && !error && data) {
+      const fetchBlogs = async () => {
+        // Map over every id to assign in transaction Id array
+        const transactionIds = data.data.transactions.edges.map(
+          (edge) => edge.node.id
+        );
+        // Fetch the blogs using the transactionIds and arweave sdk
+        const blogs = await Promise.all(
+          transactionIds.map(async (transactionId) => {
+            try {
+              const data = await arweave.transactions.getData(transactionId, {
+                decode: true,
+                string: true,
+              });
+              return JSON.parse(data);
+            } catch (error) {
+              // handle the error
+            }
+          })
+        );
+        setBlogs(blogs);
+        console.log(blogs);
+      };
+      fetchBlogs();
+    }
+  }, [data, isLoading, error]);
 
   // Infinite loading everytime you press the button it loads 3 more blogs
-  const handleLoadMore = (query, pageNumber) => {};
+  // const handleLoadMore = (query, pageNumber) => {};
 
   return (
     <div className="App">
-      {/* {blogs.map((blog) => {
+      {blogs.map((blog) => {
         return (
-          <>
-            <h1 key={blog.title}>{blog.title}</h1>
-            <p key={blog.content}>{blog.content}</p>
-          </>
+          <div key={blog.digest}>
+            <h1>{blog.content.title}</h1>
+            <h2>{blog.authorship.contributor}</h2>
+            <p>{blog.content.body}</p>
+          </div>
         );
-      })} */}
-      <button onClick={handleLoadMore}>Load More</button>
+      })}
+      <button>Load More</button>
     </div>
   );
 }

@@ -34,6 +34,7 @@ const FetchTransactionId = () => {
       method: "post",
       data: { query: query, variables: variables },
     });
+    return res.data;
   });
 
   return { data, isLoading, error };
