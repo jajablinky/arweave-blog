@@ -11,7 +11,7 @@ function App() {
   // State
   const [blogs, setBlogs] = useState([]);
   const [cursor, setCursor] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [initialPage, setInitialPage] = useState(true);
 
   // Grab transactionID for three blog posts using contributor eth address
   const { data, isLoading, error, refetch } = FetchTransactionId({ cursor });
@@ -26,7 +26,7 @@ function App() {
           (edge) => edge.node.id
         );
         // Fetch the blogs using the transactionIds and arweave sdk
-        const blogs = await Promise.all(
+        const newBlogs = await Promise.all(
           transactionIds.map(async (transactionId) => {
             try {
               const data = await arweave.transactions.getData(transactionId, {
@@ -39,8 +39,29 @@ function App() {
             }
           })
         );
-        setBlogs(blogs);
-        console.log(blogs);
+
+        // set state of new blog posts
+        // filtering for unique titles to get rid of any duplicates
+        if (initialPage) {
+          const uniqueTitles = new Set();
+          const uniqueBlogs = newBlogs.filter((blog) => {
+            if (!uniqueTitles.has(blog.content.title)) {
+              uniqueTitles.add(blog.content.title);
+              return true;
+            }
+            return false;
+          });
+          setBlogs([...blogs, ...uniqueBlogs]);
+          console.log(blogs);
+          setInitialPage(false);
+        } else {
+          const uniqueBlogs = newBlogs.filter(
+            (blog) => !blogs.some((b) => b.content.title === blog.content.title)
+          );
+          setBlogs([...blogs, ...uniqueBlogs]);
+
+          console.log(blogs);
+        }
       };
       fetchBlogs();
     }

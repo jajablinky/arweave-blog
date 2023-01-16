@@ -33,7 +33,7 @@ const FetchTransactionId = ({ cursor }) => {
   `;
   const variables = {
     contributor: "0xeD98464BDA3cE53a95B50f897556bEDE4316361c",
-    first: 3,
+    first: 10,
     cursor: cursor,
   };
   const fetchData = async () => {
