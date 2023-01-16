@@ -1,43 +1,61 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useQuery } from "react-query";
 
-const FetchTransactionId = () => {
+const FetchTransactionId = ({ cursor }) => {
   const endpoint = "https://arweave.dev/graphql";
   const query = `
     query ContributorQuery(
-      $first: Int! = 3,
+      $first: Int!
       $contributor: String!
+      $cursor: String
     ) {
       transactions(
         first: $first,
+        after: $cursor
         tags: [
           { name: "App-Name", values: ["MirrorXYZ"] }
           { name: "Contributor", values: [$contributor] }
         ]
       ) {
         edges {
+          cursor
           node {
             id
           }
+        }
+        pageInfo
+        {
+          hasNextPage
         }
       }
     }
   `;
   const variables = {
-    contributor: "0xB618aaCb9DcDc21Ca69D310A6fC04674D293A193",
+    contributor: "0xeD98464BDA3cE53a95B50f897556bEDE4316361c",
     first: 3,
+    cursor: cursor,
   };
-  const { data, isLoading, error } = useQuery("launches", async () => {
+  const fetchData = async () => {
     const res = await axios({
       url: endpoint,
       method: "post",
       data: { query: query, variables: variables },
     });
     return res.data;
-  });
+  };
 
-  return { data, isLoading, error };
+  const { data, isLoading, error, refetch } = useQuery(
+    "transactions",
+    fetchData
+  );
+  return {
+    data,
+    isLoading,
+    error,
+    cursor,
+    refetch,
+  };
 };
 
 export default FetchTransactionId;

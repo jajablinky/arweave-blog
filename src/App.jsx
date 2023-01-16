@@ -2,22 +2,27 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import FetchTransactionId from "./hooks/FetchTransactionId";
 import Arweave from "arweave";
+import ReactMarkdown from "react-markdown";
+import moment from "moment";
 
 const arweave = Arweave.init({});
 
 function App() {
-  // Grab transactionID for three blog posts using contributor eth address
-  const { data, isLoading, error } = FetchTransactionId();
-
-  // State management
+  // State
   const [blogs, setBlogs] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Grab transactionID for three blog posts using contributor eth address
+  const { data, isLoading, error, refetch } = FetchTransactionId({ cursor });
 
   // Using those three transactionID from data in useFetchBlogs for fetching blog posts content and title
   useEffect(() => {
     if (!isLoading && !error && data) {
       const fetchBlogs = async () => {
         // Map over every id to assign in transaction Id array
-        const transactionIds = data.data.transactions.edges.map(
+        setCursor(data?.data?.transactions?.edges[0].cursor);
+        const transactionIds = data?.data?.transactions?.edges.map(
           (edge) => edge.node.id
         );
         // Fetch the blogs using the transactionIds and arweave sdk
@@ -42,7 +47,9 @@ function App() {
   }, [data, isLoading, error]);
 
   // Infinite loading everytime you press the button it loads 3 more blogs
-  // const handleLoadMore = (query, pageNumber) => {};
+  const fetchNextPage = () => {
+    refetch({ cursor: cursor });
+  };
 
   return (
     <div className="App">
@@ -51,11 +58,16 @@ function App() {
           <div key={blog.digest}>
             <h1>{blog.content.title}</h1>
             <h2>{blog.authorship.contributor}</h2>
-            <p>{blog.content.body}</p>
+            <ReactMarkdown children={blog.content.body} />
+            <span>
+              <b>{moment(moment.unix(blog.content.timestamp)).fromNow()}</b>
+            </span>
           </div>
         );
       })}
-      <button>Load More</button>
+      {data && data.data ? (
+        <button onClick={fetchNextPage}>Load More</button>
+      ) : null}
     </div>
   );
 }
