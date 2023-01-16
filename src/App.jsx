@@ -12,6 +12,7 @@ function App() {
   const [blogs, setBlogs] = useState([]);
   const [cursor, setCursor] = useState(null);
   const [initialPage, setInitialPage] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Grab transactionID for three blog posts using contributor eth address
   const { data, isLoading, error, refetch } = FetchTransactionId({ cursor });
@@ -19,6 +20,7 @@ function App() {
   // Using those three transactionID from data in useFetchBlogs for fetching blog posts content and title
   useEffect(() => {
     if (!isLoading && !error && data) {
+      console.log(data.data);
       const fetchBlogs = async () => {
         // Map over every id to assign in transaction Id array
         setCursor(data?.data?.transactions?.edges[0].cursor);
