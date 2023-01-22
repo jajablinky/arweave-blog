@@ -1,4 +1,4 @@
-# arweave-blogs
+# Arweave-Blog-Tool
 
 A simple tool for fetching blogs from mirror.xyz via their graphQL endpoint, using the power of Arweave.
 
