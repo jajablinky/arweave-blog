@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
 import { useQuery } from "react-query";
 
-const FetchTransactionId = ({ cursor }) => {
+const FetchTransactionId = ({ cursor, contributor }) => {
   const endpoint = "https://arweave.dev/graphql";
   const query = `
     query ContributorQuery(
@@ -32,7 +31,7 @@ const FetchTransactionId = ({ cursor }) => {
     }
   `;
   const variables = {
-    contributor: "0xeD98464BDA3cE53a95B50f897556bEDE4316361c",
+    contributor: contributor,
     first: 10,
     cursor: cursor,
   };

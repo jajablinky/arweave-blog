@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import "./App.css";
 import FetchTransactionId from "./hooks/FetchTransactionId";
 import Arweave from "arweave";
@@ -11,11 +12,22 @@ function App() {
   // State
   const [blogs, setBlogs] = useState([]);
   const [cursor, setCursor] = useState(null);
+  // ENS address
+  const [resolved, setResolved] = useState({});
+  const [type, setType] = useState(undefined);
+  //
   const [initialPage, setInitialPage] = useState(true);
   const [loading, setLoading] = useState(true);
+  // author
+  const [contributor, setContributor] = useState(
+    "0xeD98464BDA3cE53a95B50f897556bEDE4316361c"
+  );
 
   // Grab transactionID for three blog posts using contributor eth address
-  const { data, isLoading, error, refetch } = FetchTransactionId({ cursor });
+  const { data, isLoading, error, refetch } = FetchTransactionId({
+    cursor,
+    contributor,
+  });
 
   // Using those three transactionID from data in useFetchBlogs for fetching blog posts content and title
   useEffect(() => {
@@ -76,6 +88,10 @@ function App() {
 
   return (
     <div className="App">
+      <input
+        value={contributor}
+        onChange={(e) => setContributor(e.target.value)}
+      ></input>
       {blogs.map((blog) => {
         return (
           <div key={blog.digest}>
